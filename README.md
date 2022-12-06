@@ -10,30 +10,34 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 
 ### Goals:
 
-[1] Be able to build and train NNs from scratch.
-[2] Focus on Modularity, and Optimization of code.
-[3] Learn & check correctness with PyTorch/Jax.
-[4] See how it is done PyTorch/Jax on a deeper level.
-
+* Be able to build and train NNs from scratch.
+* Focus on Modularity, and Optimization of code.
+* Learn & check correctness with PyTorch/Jax.
+* See how it is done PyTorch/Jax on a deeper level.
 
 ### Steps:
-[1] Build a starting NN:
-    [1] Set up a working env:
+1. **[IN-PROGRESS]** Build a starting NN:
+    * **[DONE]** Set up a working env:
         * Load MNIST
-    [2] Train a simple MLP to classify MNIST
+    * **[DONE]** Train a simple MLP to classify MNIST
         * Forward.
         * Backward.
         * Loop and make sure the NN is learning.
-    [DONE] Current accuracy with a simple MLP is 0.934.
-    [3] Learn how to load the data faster.
-    [4] Try a softmax layer
-    [5] Vertorize the tensor manipulations (the softmax layer)
-[2] Make it modular.
-[3] Start the project.
+        * **[DONE]** Current accuracy around 94%.
+            * Config: simple MLP, RELU, SIGMOID and quadrqatic loss.
+    * **[TO-DO]** Checkings:
+        * Check why the Cross-Entropy layer is performing (weirdly) worse.
+        * See how you can replicate your settings with PyTorch/Jax.
+2. **[TO_DO]** Optimize:
+    * Learn how to load the batches faster, using Iterators.
+    * Improve your printing ("Cool people call it debugging")
+    * Vertorize the high-dim tensors manipulations (the softmax layer)
+3. [TO-DO] Make it modular.
+    * Gets some inspirations from [this](https://www.youtube.com/playlist?list=PLeDtc0GP5ICldMkRg-DkhpFX1rRBNHTCs), Pytorch and Grokking DL.
+4. [TO-DO] Start the project.
 
 
 ### References:
-[1] Andrej Karpathy
-[2] Grokking DL
-[3] PyTorch / Jax
+* Andrej Karpathy
+* Grokking DL
 

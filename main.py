@@ -64,6 +64,15 @@ def softmax(l):
 
 
 
+def forward2(X):
+    Z1 = X@W1 + b1
+    L1 = Z1*(Z1>0)
+    Z2 = L1@W2 + b2
+    L2 = Z2*(Z2>0)
+    Z3 = L2@W3 + b3
+    L3 = Z3*(Z3>0)
+    return softmax(L3)
+
 def forward(X):
     Z1 = X@W1 + b1
     L1 = Z1*(Z1>0)
@@ -91,21 +100,46 @@ for _ in range(epoch):
         Z2 = L1@W2 + b2
         L2 = Z2*(Z2>0)
         Z3 = L2@W3 + b3
-        L3 = 1/(1+np.exp(-Z3))
+        #L3 = 1/(1+np.exp(-Z3))
+        #diff = (L3-yy)**2
+        #loss = np.sum(diff)
 
-        diff = (L3-yy)**2
-
-        loss = np.sum(diff)
-
-        # print(loss)
-
-        #######
-        #######
-
-        dL3 = 2*(L3-yy)
         
-        dZ3 = L3*(1-L3)*dL3
 
+        L3 = Z3*(Z3>0)
+        L4 = softmax(L3)
+
+        L = -np.log(L4[range(batch),labs])
+
+#        print(np.sum(L))
+
+
+        # backward pass:
+        dL4 = np.copy(yy)  
+
+        dL4[range(batch), labs] = -1/L4[range(batch),labs]
+
+        dL4_dL3 = np.zeros((batch, 10, 10))
+        for i in range(batch):
+            for j in range(10):
+                dL4_dL3[i,j,:] = np.array([-L4[i, j]*L4[i, k] for k in range(10)])
+                dL4_dL3[i,j,j] = L4[i,j]*(1-L4[i,j])
+                
+        dL3 = np.zeros((batch, 10))
+        for m in range(batch):
+            for n in range(10):
+                dL3[m,n] = dL4[m,labs[m]] * dL4_dL3[m,n,labs[m]]
+
+        #for j in range(10):
+        #    dL3[:,j] = np.diag(L4 @ dL4_dL3[:,j,:].T) 
+
+        #######
+        #######
+
+        # dL3 = 2*(L3-yy)
+        #dZ3 = L3*(1-L3)*dL3
+
+        dZ3 = dL3 * (Z3>0)
         dW3 = L2.T @ dZ3
         db3 = np.sum(dZ3, axis=0) 
         dL2 = dZ3 @ W3.T 
@@ -134,50 +168,15 @@ for _ in range(epoch):
         b3 -= alpha * db3
 
 
-    test = forward(X2)
+    test = forward2(X2)
     equal= np.argmax(test, axis=1) == y_test
 
-    acc.append(np.sum(equal)/len(equal))
+    print(np.sum(equal)/len(equal))
 
 
 
 
 """
-        L3 = Z3*(Z3>0)
-
-        L4 = softmax(L3) 
-#        print(L4[0])
-#        print(L4[range(batch),labs])
-        L = -np.log(L4[range(batch),labs]+0.01)
-        
-#        loss = quadraticLoss(L4,yy)
-#        cross= cross_entropy(L4, labs)
-
-        print(np.sum(L))
-
-#        print(loss)
-
-        # backward pass:
-        dL4 = np.copy(yy)  
-
-        dL4[range(batch), labs] = -1/L4[range(batch),labs]
-
-        dL4_ = 2*yy*(yy-L4)
-
-        dL4_dL3 = np.zeros((batch, 10, 10))
-        for i in range(batch):
-            for j in range(10):
-                dL4_dL3[i,j,:] = np.array([-L4[i, j]*L4[i, k] for k in range(10)])
-                dL4_dL3[i,j,j] = L4[i,j]*(1-L4[i,j])
-                
-        dL3 = np.zeros((batch, 10))
-        for m in range(batch):
-            for n in range(10):
-                dL3[m,n] = dL4[m] @ dL4_dL3[m,n]
-
-        #for j in range(10):
-        #    dL3[:,j] = np.diag(L4 @ dL4_dL3[:,j,:].T) 
-
 #        dL3_dZ3 = 1 * (Z3>0)               
 #        dZ3 = dL3 * dL3_dZ3
 """
