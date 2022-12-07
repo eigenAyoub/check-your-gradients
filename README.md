@@ -21,9 +21,7 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 * Andrej Karpathy: [YouTube](https://www.youtube.com/@AndrejKarpathy) or [CS231n 2016](http://cs231n.stanford.edu/2016/)
 * Mathieu Blondel: github repo and Section in new version of Murray Book
 * Bishop NN Chapter has a section on backprop
-* 
 * Hennig (Lecture 8, Learning Representations)
-* 
 * TinyGrad by George Hotz
 
 ### Progress:
