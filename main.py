@@ -3,7 +3,8 @@ from sklearn import datasets
 
 import numpy as np
 
-from numpy.random import normal
+from numpy.random import normal, randint
+
 
 # data loading
 dataset = datasets.load_digits()
@@ -104,8 +105,6 @@ for _ in range(epoch):
         #diff = (L3-yy)**2
         #loss = np.sum(diff)
 
-        
-
         L3 = Z3*(Z3>0)
         L4 = softmax(L3)
 
@@ -113,23 +112,25 @@ for _ in range(epoch):
 
 #        print(np.sum(L))
 
-
         # backward pass:
         dL4 = np.copy(yy)  
 
         dL4[range(batch), labs] = -1/L4[range(batch),labs]
 
-        dL4_dL3 = np.zeros((batch, 10, 10))
-        for i in range(batch):
-            for j in range(10):
-                dL4_dL3[i,j,:] = np.array([-L4[i, j]*L4[i, k] for k in range(10)])
-                dL4_dL3[i,j,j] = L4[i,j]*(1-L4[i,j])
+#        dL4_dL3 = np.zeros((batch, 10, 10))
+#        for i in range(batch):
+#            for j in range(10):
+#                dL4_dL3[i,j,:] = np.array([-L4[i, j]*L4[i, k] for k in range(10)])
+#                dL4_dL3[i,j,j] = L4[i,j]*(1-L4[i,j])
+
                 
         dL3 = np.zeros((batch, 10))
         for m in range(batch):
             for n in range(10):
-                dL3[m,n] = dL4[m,labs[m]] * dL4_dL3[m,n,labs[m]]
-
+#                dL4_dL3[m,n,labs[m]] = L4[m,n]*(1*(labs[m]=n) - L4[m,n])
+                k =  L4[m,n]*(1*(labs[m]==n) - L4[m,n])
+#                dL3[m,n] = dL4[m,labs[m]] * dL4_dL3[m,n,labs[m]]
+                dL3[m,n] = dL4[m,labs[m]] * k
         #for j in range(10):
         #    dL3[:,j] = np.diag(L4 @ dL4_dL3[:,j,:].T) 
 
@@ -157,7 +158,7 @@ for _ in range(epoch):
           
         # updates:
         
-        alpha = 0.0001
+        alpha = 0.00001
 
         W3 -= alpha * dW3
         W2 -= alpha * dW2
@@ -176,8 +177,4 @@ for _ in range(epoch):
 
 
 
-"""
-#        dL3_dZ3 = 1 * (Z3>0)               
-#        dZ3 = dL3 * dL3_dZ3
-"""
 
