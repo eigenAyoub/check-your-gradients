@@ -17,40 +17,40 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 * Appreciate more the design choices of PyTorch/Jax, and don't take them for granted.
 
 ### References:
-* Andrej Karpathy: [YouTube](https://www.youtube.com/@AndrejKarpathy) or [CS231n 2016](http://cs231n.stanford.edu/2016/)
-* Mathieu Blondel: github repo and Section in new version of Murray Book
+* Mathieu Blondel: Add github repo +  section from version of Murray (ML a probb perspective?)
 * Bishop NN Chapter has a section on backprop
 * Hennig (Lecture 8, Learning Representations)
-* TinyGrad by George Hotz
+* The idea is to start this project inspired by MICROGRAD (Andrej Karpathy)and TinyGrad (George Hotz) streams.
 
 ### Progress:
 
-* (Live) Plan:
-    1. **[DONE]** Build a wrapper around **np.array**.
-        * Add the necessary "magic" methods to the simple MLP work.
-        * Make sure the forward pass is working fine.
-    2. **[DONE]** Using **graphviz**, build a visualizer of the Computation Graph (Forward Pass).
-        * [Check this Guide](https://www.graphviz.org/pdf/dotguide.pdf) ![Cool Graph?](media/Digraph.gv.png "Comp. Graph")
-    3. **[IN PROGRESS]** Build Autodiff on a simple MLPs:     
-        * Make this NN work: $L = \sigma(\sigma(X W_1 + b_1)W_2 + b_2)$
-        * Pay attention to "topological" sorts.
-        * Don't forget to zero_grad after each update
-        * Don't forget to add grads, when one componenet is the "root" of multiple ops.
-    4. **[TO-DO]** Testing:
-            * Automate testing.
-            * Find a way to check the correctness, either:
-                * compare Vs. PyTorch.
-                * (OR/AND) Manauly check Gradients.    
-    5. **[TO-DO]** Keep updating the plan, choices:, 
-       * l1/l2 Regularization? Dropout? Batch Norm? fancy Optimizers?
-       * Complex Architectures? (e.g., )
+1. **[DONE]** Build a wrapper around **np.array**.
+    * Add the necessary "magic" methods to the simple MLP work.
+    * Make sure the forward pass is working fine.
+2. **[DONE]** Using **graphviz**, build a visualizer of the Computation Graph (Forward Pass).
+    * [Check this Guide](https://www.graphviz.org/pdf/dotguide.pdf) ![Cool Graph?](media/Digraph.gv.png "Comp. Graph")
+3. **[DONE]** Build Autodiff on a simple MLPs:     
+    * Make this NN work: $L = \sigma(\sigma(X W_1 + b_1)W_2 + b_2)$
+    * Pay attention to "topological" sorts.
+    * Don't forget to zero_grad after each update
+    * Don't forget to add grads, when one componenet is the "root" of multiple ops.
+5. **[TO-DO]** Switch notation from X@W to W@X (feels more intuitive, could visual)
+6. **[TO_DO]** Add more magic methods to the wrapper.
+4. **[IN-PROGRESS]** Testing:
+        * Automate testing.
+        * Find a way to check the correctness, either:
+            * **[DONE]** compare Vs. PyTorch.
+            * (OR/AND) Manauly check Gradients.    
+5. **[TO-DO]** Keep updating the plan, choices:, 
+   * l1/l2 Regularization? Dropout? Batch Norm? fancy Optimizers?
+   * Complex Architectures? (e.g., )
 
-    6. **[TO-DO]** Optimize:
-        * Learn how to load mini-batches faster, perhaps using Iterators? Is it even useful?.
-        * Improve your printing ("Cool people call it debugging skills")
-        * Vertorize the 3-dim tensors manipulations (the softmax layer)
+6. **[TO-DO]** Optimize:
+    * Learn how to load mini-batches faster, perhaps using Iterators? Is it even useful?.
+    * Improve your printing ("Cool people call it debugging skills")
+    * Vertorize the 3-dim tensors manipulations (the softmax layer)
 
-* **[DONE]** Priliminaries:   
+7. **[DONE]** Priliminaries:   
     1. Build a starting NN (no modularity whatsoever, just a script with a bunch of matrices):
          * Set up a working env:
          * Load MNIST, some pre-processing (baisc spliting and so one)
@@ -60,7 +60,7 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
         * Current accuracy around 94%.
             * Config: simple MLP, RELU, SIGMOID and quadrqatic loss.
 
-* Extra notes to keep in mind:
+8. Extra notes to keep in mind:
     * Check why the Cross-Entropy layer is performing (weirdly) worse.
     * See how you can replicate your settings with PyTorch/Jax.
 

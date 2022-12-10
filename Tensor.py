@@ -125,7 +125,7 @@ class Tensor(object):
         output = Tensor(1/(1+np.exp(-self.data)), label="σ("+self.label+")")
         output.roots = [self] 
 
-        output.how = "sigmoid"
+        output.how = "sig"
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
@@ -158,28 +158,39 @@ class Tensor(object):
 
 
 
-x = np.array([
+x_ = np.array([
     [5, 1, 2, 4, 0],
     [1, 4, 5, 2, 0],
     [3, 3, 3, 3, 4]])
 
-X = Tensor(x)
-Y = Tensor(np.array([[ 1],
+y_ = np.array([[ 1],
        [0],
-       [1]]))
+       [1]])
+
+X = Tensor(x_)
+Y = Tensor(y_)
 
 Y.label = "Y"
 
-W1 = Tensor(normal(scale = 1/3 ,size=(5, 10)), label="W1")
-b1 =  Tensor(np.ones((10,)), label="b1")
+w1_ = normal(scale = 1/3 ,size=(5, 10))
+b1_ = np.ones((10,))
 
+w2_ = normal(scale = 1/10 , size=(10,1))
+b2_ = np.zeros(1,)
+
+
+W1 = Tensor(w1_, label="W1")
+b1 =  Tensor(b1_, label="b1")
+
+W2 = Tensor(w2_, label="W2")
+b2 = Tensor(b2_, label="b2")
+
+"""
 Z1 = X@W1; Z1.label = "Z1"
 Z12 = Z1 + b1; Z12.label = "Z12"
 
 L1 = Z12.sigmoid()
 
-W2 = Tensor(normal(scale = 1/10 , size=(10,1)), label="W2")
-b2 = Tensor(np.zeros(1,), label="b2")
 
 Z2 = L1@W2; Z2.label="Z2"
 Z22 = Z2 + b2; Z22.label = "Z22" 
@@ -188,18 +199,28 @@ L2 = Z22.sigmoid()
 
 L3 = L2-Y
 loss = L3.quadratic_loss()
+"""
+
+alpha = 0.01
+
 
 def forward(d):
-    l2 = d@W1
-    l3 = l2 + b1
-    l1 = l2.sigmoid()
+    l1 = (d@W1 + b1).sigmoid()
     return (l1@W2+b2).sigmoid()
 
-alpha = 0.001
 
-tt = forward(X)
+l0 = lambda : (forward(X)-Y).quadratic_loss()
 
-for _ in range(10):
+def pass_():
+    Z1 = X@W1; Z1.label = "Z1"
+    Z12 = Z1 + b1; Z12.label = "Z12"
+    L1 = Z12.sigmoid()
+    Z2 = L1@W2; Z2.label="Z2"
+    Z22 = Z2 + b2; Z22.label = "Z22" 
+    L2 = Z22.sigmoid()
+    L3 = L2-Y
+    loss = L3.quadratic_loss()
+    
     loss.pass_the_grad()
     L3.pass_the_grad()
     L2.pass_the_grad()
@@ -209,13 +230,11 @@ for _ in range(10):
     Z12.pass_the_grad()
     Z1.pass_the_grad()
 
-#    W1.data = W1.data - alpha*W1.grad
-#    b1.data = b1.data - alpha*b1.grad
-
+    W1.data = W1.data - alpha*W1.grad
+    b1.data = b1.data - alpha*b1.grad
     W2.data = W2.data - alpha*W2.grad 
     b2.data = b2.data - alpha*b2.grad
 
-#    print((forward(X)-Y).quadratic_loss())
     # Empty Grads:
     loss.grad = np.ones(loss.grad.shape)
     L3.grad = np.zeros(L3.grad.shape)
@@ -232,24 +251,6 @@ for _ in range(10):
     W2.grad =  np.zeros(W2.grad.shape)
     b2.grad =  np.zeros(b2.grad.shape)
                           
-
-print(tt)
-print(forward(X))
-
-
-
-
-
-llab = []
-lgrad = []
-
-
-
-
-
-
-
-
 
 
 t=0
@@ -274,4 +275,42 @@ if t :
 
 
 
+## PyTorch:
+import torch
 
+tx = torch.tensor(x_, dtype=torch.float64)
+ty = torch.tensor(y_, dtype=torch.float64)
+
+tw1 = torch.tensor(w1_, requires_grad=True, dtype=torch.float64)
+tw2 = torch.tensor(w2_, requires_grad=True, dtype=torch.float64)
+tb1 = torch.tensor(b1_, requires_grad=True, dtype=torch.float64)
+tb2 = torch.tensor(b2_, requires_grad=True, dtype=torch.float64)
+
+
+
+
+py_loss = lambda : ((((tx@tw1+tb1).sigmoid()@tw2+tb2).sigmoid() - ty)**2).sum() 
+
+py_l0 = py_loss()
+
+
+
+alpha = 0.5
+for i in range(200):
+    y = ((((tx@tw1+tb1).sigmoid()@tw2+tb2).sigmoid() - ty)**2).sum()
+    y.backward() 
+    
+    with torch.no_grad():    
+        tw1 = tw1 - alpha*tw1.grad
+        tw2 = tw2 - alpha*tw2.grad
+        tb1 = tb1 - alpha*tb1.grad
+        tb2 = tb2 - alpha*tb2.grad
+
+    tw1.requires_grad_(True)
+    tw2.requires_grad_(True)
+    tb1.requires_grad_(True)
+    tb2.requires_grad_(True)
+
+    pass_(); 
+    
+    print(py_loss(), l0())
