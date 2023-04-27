@@ -3,6 +3,10 @@ from numpy.random import randint, normal
 
 import graphviz
 
+from sklearn import datasets, svm, metrics
+from torch.utils.data import Dataset, DataLoader
+
+from MNISTDataset import MNISTDataset
 
 class Tensor(object):
     """Docstring for Tensor. """
@@ -26,7 +30,9 @@ class Tensor(object):
     def __str__(self):
         return str(self.data.__str__())
 
-    # Ops:
+    # Operations:
+
+    # Magic functions:
 
     def __sub__(self, other):
         output = Tensor(self.data - other.data, label=self.label+"-"+other.label)
@@ -46,6 +52,28 @@ class Tensor(object):
                 other.grad += -np.sum(output.grad, axis=0)
             else:
                 other.grad += -output.grad
+
+        output.pass_the_grad = pass_the_gradient
+
+        return  output 
+
+
+    def entropy(self, other):
+        ypred = self.data
+        yhat = other.data
+
+        output = -np.log(yhat(
+
+        output = Tensor(np.sum(self.data**2), label="l")
+        output.grad = np.ones(self.data.shape)
+        output.roots = [self]
+        output.how = "Sum"
+        
+        def pass_the_gradient():
+            """this function does:
+            > Updates the gradients of the parents/roots.
+            """
+            self.grad += 2*self.data
 
         output.pass_the_grad = pass_the_gradient
 
@@ -110,7 +138,6 @@ class Tensor(object):
         output.roots = [self, other] 
         output.how = "@"
 
-        
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
@@ -155,104 +182,10 @@ class Tensor(object):
         """
         n_e = self.comp_graph()
 
-
-
-
-x_ = np.array([
-    [5, 1, 2, 4, 0],
-    [1, 4, 5, 2, 0],
-    [3, 3, 3, 3, 4]])
-
-y_ = np.array([[ 1],
-       [0],
-       [1]])
-
-X = Tensor(x_)
-Y = Tensor(y_)
-
-Y.label = "Y"
-
-w1_ = normal(scale = 1/3 ,size=(5, 10))
-b1_ = np.ones((10,))
-
-w2_ = normal(scale = 1/10 , size=(10,1))
-b2_ = np.zeros(1,)
-
-
-W1 = Tensor(w1_, label="W1")
-b1 =  Tensor(b1_, label="b1")
-
-W2 = Tensor(w2_, label="W2")
-b2 = Tensor(b2_, label="b2")
-
-"""
-Z1 = X@W1; Z1.label = "Z1"
-Z12 = Z1 + b1; Z12.label = "Z12"
-
-L1 = Z12.sigmoid()
-
-
-Z2 = L1@W2; Z2.label="Z2"
-Z22 = Z2 + b2; Z22.label = "Z22" 
-
-L2 = Z22.sigmoid()
-
-L3 = L2-Y
-loss = L3.quadratic_loss()
-"""
-
-alpha = 0.01
-
-
-def forward(d):
-    l1 = (d@W1 + b1).sigmoid()
-    return (l1@W2+b2).sigmoid()
-
-
 l0 = lambda : (forward(X)-Y).quadratic_loss()
 
-def pass_():
-    Z1 = X@W1; Z1.label = "Z1"
-    Z12 = Z1 + b1; Z12.label = "Z12"
-    L1 = Z12.sigmoid()
-    Z2 = L1@W2; Z2.label="Z2"
-    Z22 = Z2 + b2; Z22.label = "Z22" 
-    L2 = Z22.sigmoid()
-    L3 = L2-Y
-    loss = L3.quadratic_loss()
-    
-    loss.pass_the_grad()
-    L3.pass_the_grad()
-    L2.pass_the_grad()
-    Z22.pass_the_grad()
-    Z2.pass_the_grad()
-    L1.pass_the_grad()
-    Z12.pass_the_grad()
-    Z1.pass_the_grad()
 
-    W1.data = W1.data - alpha*W1.grad
-    b1.data = b1.data - alpha*b1.grad
-    W2.data = W2.data - alpha*W2.grad 
-    b2.data = b2.data - alpha*b2.grad
-
-    # Empty Grads:
-    loss.grad = np.ones(loss.grad.shape)
-    L3.grad = np.zeros(L3.grad.shape)
-
-    L2.grad =  np.zeros(L2.grad.shape)
-    Z22.grad = np.zeros(Z22.grad.shape)
-    Z2.grad =  np.zeros(Z2.grad.shape)
-    L1.grad =  np.zeros(L1.grad.shape)
-    Z12.grad = np.zeros(Z12.grad.shape)
-    Z1.grad =  np.zeros(Z1.grad.shape)
-
-    W1.grad =  np.zeros(W1.grad.shape)
-    b1.grad =  np.zeros(b1.grad.shape)
-    W2.grad =  np.zeros(W2.grad.shape)
-    b2.grad =  np.zeros(b2.grad.shape)
-                          
-
-
+"""
 t=0
 if t :
     g = Digraph(format='png')                                                      
@@ -270,7 +203,6 @@ if t :
         g.edge(t[n][0], str(n)+t[n][1]) 
         for k in t[n][2]: 
             g.edge(str(n)+t[n][1],k) 
-
 
 
 
@@ -301,16 +233,17 @@ for i in range(200):
     y.backward() 
     
     with torch.no_grad():    
-        tw1 = tw1 - alpha*tw1.grad
-        tw2 = tw2 - alpha*tw2.grad
-        tb1 = tb1 - alpha*tb1.grad
-        tb2 = tb2 - alpha*tb2.grad
+        py_w1 = py_w1 - alpha*py_w1.grad
+        py_w2 = py_w2 - alpha*py_w2.grad
+        py_b1 = py_b1 - alpha*py_b1.grad
+        py_b2 = py_b2 - alpha*py_b2.grad
 
-    tw1.requires_grad_(True)
-    tw2.requires_grad_(True)
-    tb1.requires_grad_(True)
-    tb2.requires_grad_(True)
+    py_w1.requires_grad_(True)
+    py_w2.requires_grad_(True)
+    py_b1.requires_grad_(True)
+    py_b2.requires_grad_(True)
 
     pass_(); 
     
     print(py_loss(), l0())
+"""

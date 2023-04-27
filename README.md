@@ -25,13 +25,12 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 ### Progress:
 
 1. **[DONE]** Build a wrapper around **np.array**.
-    * Add the necessary "magic" methods to the simple MLP work.
+    * Add the necessary "magic" methods to make a simple MLP work.
     * Make sure the forward pass is working fine.
-2. **[DONE]** Using **graphviz**, build a visualizer of the Computation Graph (Forward Pass).
-    * [Check this Guide](https://www.graphviz.org/pdf/dotguide.pdf) ![Cool Graph?](media/Digraph.gv.png "Comp. Graph")
-3. **[DONE]** Build Autodiff on a simple MLPs:     
+2. **[DONE]** Using **graphviz**, build a visualizer of the Computation Graph (Forward Pass). ([Check this Guide](https://www.graphviz.org/pdf/dotguide.pdf)). Result is such a beauty >> ![Cool Graph?](media/Digraph.gv.png "Comp. Graph")
+3. **[DONE]** Build Autodiff for a simple MLP:     
     * Make this NN work: $L = \sigma(\sigma(X W_1 + b_1)W_2 + b_2)$
-    * Pay attention to "topological" sorts.
+    * Pay attention to "topological" sorts, when updating.
     * Don't forget to zero_grad after each update
     * Don't forget to add grads, when one componenet is the "root" of multiple ops.
 5. **[TO-DO]** Switch notation from X@W to W@X (feels more intuitive, could visual)

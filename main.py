@@ -6,175 +6,87 @@ import numpy as np
 from numpy.random import normal, randint
 
 
-# data loading
-dataset = datasets.load_digits()
-data = dataset.data
-target = dataset.target
-
-# Constructing 1 hot encoding of the labels (I'm not sure if this what they called)
-y = np.zeros((target.shape[0],10))
-y[range(target.shape[0]),target] = 1
-
-# train / test split
-X1, X2 = data[:1600], data[1600:]
-Y1, Y2 = y[:1600],y[1600:]
-
-
-y_test = target[1600:]
-
-batch = 16
-
-# shapes >> X (N,64)
-#        >> Y (N,)
-
-
-# Layers:
-
-# Xavier Initia (Does any one know why it works? Poke: ML Alchemy)
-
-W1 = normal(scale = 2/64,  size=(64,70))
-W2 = normal(scale = 2/70,  size=(70,300))
-W3 = normal(scale = 2/300, size=(300,10))
-
-b1 = np.zeros((70,))
-b2 = np.zeros((300,))
-b3 = np.zeros((10,))
-
-
-# Computing the LOSS:
-
-def quadraticLoss(pred, labels):
-    """
-    Compute the quadratic loss:
-    L = \sum (y_i - x_i)^2
-    """
-
-    l = (pred -  labels)**2
-    return np.sum(l)
+from Tensor import Tensor
+from MNISTDataset import MNISTDataset
 
 
 
-# Computing the softmax layer:
-def softmax(l):
-    """
-    compute a vectorized softmax layer
+# weights:
+w1_ = normal(scale = 1/3 ,size=(64, 120))                                       
+b1_ = np.ones((120,))                                                           
+                                                                                
+w2_ = normal(scale = 1/10 , size=(120,10))                                      
+b2_ = np.zeros(10,)                                                             
+                                                                                
+W1 = Tensor(w1_, label="W1")                                                    
+b1 =  Tensor(b1_, label="b1")                                                   
+                                                                                
+W2 = Tensor(w2_, label="W2")                                                    
+b2 = Tensor(b2_, label="b2")                                                    
+                             
+N = 1797
+batch_size = 20
 
-    """
-    ll = np.exp(l - l.max(axis=1, keepdims=True))
-    return ll / np.sum(ll, axis=1, keepdims=True)
-
-
-
-def forward2(X):
-    Z1 = X@W1 + b1
-    L1 = Z1*(Z1>0)
-    Z2 = L1@W2 + b2
-    L2 = Z2*(Z2>0)
-    Z3 = L2@W3 + b3
-    L3 = Z3*(Z3>0)
-    return softmax(L3)
-
-def forward(X):
-    Z1 = X@W1 + b1
-    L1 = Z1*(Z1>0)
-    Z2 = L1@W2 + b2
-    L2 = Z2*(Z2>0)
-    Z3 = L2@W3 + b3
-    return 1/(1+np.exp(-Z3))
+# Loading using DataSet and DataLoader:
+digits = datasets.load_digits()
+g = MNISTDataset(digits, N)
+data_loader = DataLoader(g, batch_size=16, shuffle=True)
 
 
-epoch = 500
-batches = 100
+for i in range(0) :                                                             
+    x_, y_ =  next(iter(data_loader))                                           
+    x_, y_ = Tensor(x_), Tensor(y_)                                             
+                                                                                
+alpha = 0.01                                                                    
 
-acc = []
-
-for _ in range(epoch): 
-    for k in range(batches):
-
-        X = X1[k*batch: (k+1)*batch]
-        yy = Y1[k*batch: (k+1)*batch]
-        labs = target[k*batch:(k+1)*batch]
-        
-        # forward pass
-        Z1 = X@W1 + b1
-        L1 = Z1*(Z1>0)
-        Z2 = L1@W2 + b2
-        L2 = Z2*(Z2>0)
-        Z3 = L2@W3 + b3
-        #L3 = 1/(1+np.exp(-Z3))
-        #diff = (L3-yy)**2
-        #loss = np.sum(diff)
-
-        L3 = Z3*(Z3>0)
-        L4 = softmax(L3)
-
-        L = -np.log(L4[range(batch),labs])
-
-#        print(np.sum(L))
-
-        # backward pass:
-        dL4 = np.copy(yy)  
-
-        dL4[range(batch), labs] = -1/L4[range(batch),labs]
-
-#        dL4_dL3 = np.zeros((batch, 10, 10))
-#        for i in range(batch):
-#            for j in range(10):
-#                dL4_dL3[i,j,:] = np.array([-L4[i, j]*L4[i, k] for k in range(10)])
-#                dL4_dL3[i,j,j] = L4[i,j]*(1-L4[i,j])
-
-                
-        dL3 = np.zeros((batch, 10))
-        for m in range(batch):
-            for n in range(10):
-#                dL4_dL3[m,n,labs[m]] = L4[m,n]*(1*(labs[m]=n) - L4[m,n])
-                k =  L4[m,n]*(1*(labs[m]==n) - L4[m,n])
-#                dL3[m,n] = dL4[m,labs[m]] * dL4_dL3[m,n,labs[m]]
-                dL3[m,n] = dL4[m,labs[m]] * k
-        #for j in range(10):
-        #    dL3[:,j] = np.diag(L4 @ dL4_dL3[:,j,:].T) 
-
-        #######
-        #######
-
-        # dL3 = 2*(L3-yy)
-        #dZ3 = L3*(1-L3)*dL3
-
-        dZ3 = dL3 * (Z3>0)
-        dW3 = L2.T @ dZ3
-        db3 = np.sum(dZ3, axis=0) 
-        dL2 = dZ3 @ W3.T 
-
-        dZ2 = dL2 * (Z2>0)
-
-        dW2 = L1.T @ dZ2 
-        db2 = np.sum(dZ2, axis=0)
-        dL1 = dZ2 @ W2.T 
-
-        dZ1 = dL1 * (Z1>0) 
-
-        dW1 = X.T @ dZ1
-        db1 = np.sum(dZ1, axis=0)
-          
-        # updates:
-        
-        alpha = 0.00001
-
-        W3 -= alpha * dW3
-        W2 -= alpha * dW2
-        W1 -= alpha * dW1 
-
-        b1 -= alpha * db1
-        b2 -= alpha * db2 
-        b3 -= alpha * db3
-
-
-    test = forward2(X2)
-    equal= np.argmax(test, axis=1) == y_test
-
-    print(np.sum(equal)/len(equal))
+def forward(d):                                                                 
+    l1 = (d@W1 + b1).sigmoid()                                                  
+    return (l1@W2+b2).sigmoid()
 
 
 
+def pass_(x, y):
+    Z1 = x@W1; Z1.label = "Z1"
+    Z12 = Z1 + b1; Z12.label = "Z12"
+    L1 = Z12.sigmoid()
+    Z2 = L1@W2; Z2.label="Z2"
+    Z22 = Z2 + b2; Z22.label = "Z22" 
+    L2 = Z22.sigmoid()
+    print(L2.data.size(), y.data.size())
+    L3 = L2-y
+    loss = L3.quadratic_loss()
+    
+    loss.pass_the_grad()
+    L3.pass_the_grad()
+    L2.pass_the_grad()
+    Z22.pass_the_grad()
+    Z2.pass_the_grad()
+    L1.pass_the_grad()
+    Z12.pass_the_grad()
+    Z1.pass_the_grad()
+
+    # update the grads
+
+    W1.data = W1.data - alpha*W1.grad
+    b1.data = b1.data - alpha*b1.grad
+    W2.data = W2.data - alpha*W2.grad 
+    b2.data = b2.data - alpha*b2.grad
+
+    # Empty Grads:
+    loss.grad = np.ones(loss.grad.shape)
+    L3.grad = np.zeros(L3.grad.shape)
+
+    L2.grad =  np.zeros(L2.grad.shape)
+    Z22.grad = np.zeros(Z22.grad.shape)
+    Z2.grad =  np.zeros(Z2.grad.shape)
+    L1.grad =  np.zeros(L1.grad.shape)
+    Z12.grad = np.zeros(Z12.grad.shape)
+    Z1.grad =  np.zeros(Z1.grad.shape)
+
+    W1.grad =  np.zeros(W1.grad.shape)
+    b1.grad =  np.zeros(b1.grad.shape)
+    W2.grad =  np.zeros(W2.grad.shape)
+    b2.grad =  np.zeros(b2.grad.shape)
 
 
+                          
