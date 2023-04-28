@@ -31,8 +31,6 @@ digits = datasets.load_digits()
 g = MNISTDataset(digits.data, digits.target, N)
 data_loader = DataLoader(g, batch_size=16, shuffle=True)
 
-x_, y_ =  next(iter(data_loader))                                           
-x, y = Tensor(x_), Tensor(y_)                                             
                                                                                 
 alpha = 0.01                                                                    
 
@@ -41,27 +39,27 @@ def forward(d):
     return (l1@W2+b2).sigmoid()
 
 
-
-#def pass_(x, y):
-Z1 = x@W1; Z1.label = "Z1"
-Z12 = Z1 + b1; Z12.label = "Z12"
-L1 = Z12.sigmoid()
-Z2 = L1@W2; Z2.label = "Z2"
-Z22 = Z2 + b2; Z22.label = "Z22" 
-L2 = Z22.sigmoid()
-#print(L2.data.size(), y.data.size())
-Lsoft = L2.softmax_layer()
-
-
-
-
-for i in range(0):
-    # forward pass:
-
-
+for i in range(100):
+    x_, y_ =  next(iter(data_loader))                                           
+    x, y = Tensor(x_), Tensor(y_)                                             
     # backward pass:
-    loss.pass_the_grad()
-    L3.pass_the_grad()
+
+    Z1 = x@W1; Z1.label = "Z1"
+    Z12 = Z1 + b1; Z12.label = "Z12"
+    L1 = Z12.sigmoid()
+    Z2 = L1@W2; Z2.label = "Z2"
+    Z22 = Z2 + b2; Z22.label = "Z22" 
+    L2 = Z22.sigmoid(); L2.label = "L2"
+
+
+    Lsoft = L2.softmax_layer(); Lsoft.label = "softm(L2)"
+
+    l = Lsoft.cross_entropy_loss(y); l.label = "loss"
+
+    print("Loss at iteration ", i, "is: ", np.sum(l.data))
+
+    l.pass_the_grad()
+    Lsoft.pass_the_grad()
     L2.pass_the_grad()
     Z22.pass_the_grad()
     Z2.pass_the_grad()
@@ -69,7 +67,7 @@ for i in range(0):
     Z12.pass_the_grad()
     Z1.pass_the_grad()
 
-    # update the grads
+    # update the grads:
 
     W1.data = W1.data - alpha*W1.grad
     b1.data = b1.data - alpha*b1.grad
@@ -77,8 +75,9 @@ for i in range(0):
     b2.data = b2.data - alpha*b2.grad
 
     # Empty Grads:
-    loss.grad = np.ones(loss.grad.shape)
-    L3.grad = np.zeros(L3.grad.shape)
+
+    l.grad = np.ones(l.grad.shape)
+    Lsoft.grad = np.zeros(Lsoft.grad.shape)
 
     L2.grad =  np.zeros(L2.grad.shape)
     Z22.grad = np.zeros(Z22.grad.shape)

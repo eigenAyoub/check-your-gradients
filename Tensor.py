@@ -65,13 +65,18 @@ class Tensor(object):
         output = torch.exp(self.data - mx)/sm
         output = Tensor(output.numpy())
 
+        output.how = "softmax layer"
+        output.roots = [self]
+
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
             """
-            self.grad += self.output * (output.grad - 
-                                        torch.sum(G * output.data, 
-                                                  dim=1)[:, None]
+
+
+            self.grad += output.data * (output.grad - 
+                                        np.sum(output.grad * output.data, 
+                                                  axis=1)[:, None]
                                         )
 
         output.pass_the_grad = pass_the_gradient
@@ -84,11 +89,13 @@ class Tensor(object):
                             , axis=1 )
         output = Tensor(output)
 
+        output.roots = [self, other]
+        output.how = "cross ent loss"
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
             """
-            self.grad += - self.other / self.data
+            self.grad += - other.data.numpy() / self.data
 
         output.pass_the_grad = pass_the_gradient
 
@@ -162,7 +169,7 @@ class Tensor(object):
             > Updates the gradients of the parents/roots.
             """
             self.grad  += output.grad @ other.data.T
-            other.grad += self.data.T @ output.grad 
+            other.grad += self.data.numpy().T @ output.grad 
         output.pass_the_grad = pass_the_gradient
         
         return  output 
@@ -176,7 +183,8 @@ class Tensor(object):
             """this function does:
             > Updates the gradients of the parents/roots.
             """
-            self.grad += output.data*(1-output.data) * output.grad
+
+            self.grad += output.data.numpy()*(1-output.data.numpy()) * output.grad
         output.pass_the_grad = pass_the_gradient
 
         return output
@@ -203,7 +211,6 @@ class Tensor(object):
         """
         n_e = self.comp_graph()
 
-l0 = lambda : (forward(X)-Y).quadratic_loss()
 
 
 """
