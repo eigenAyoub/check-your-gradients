@@ -1,10 +1,12 @@
+import torch
 from torch.utils.data import Dataset
 
 class MNISTDataset(Dataset):
     'Characterizes a dataset for PyTorch'                                       
-    def __init__(self, data, N):                                                
+    def __init__(self, X, Y, N):                                                
         'Initialization'                                                        
-        self.data = data                                                        
+        self.data = X 
+        self.target = Y 
         self.list_IDs = range(N)                                                
     def __len__(self):                                                          
         'Denotes the total number of samples'                                   
@@ -12,10 +14,9 @@ class MNISTDataset(Dataset):
                                                                                 
     def __getitem__(self, index):                                               
         'Generates one sample of data'                                          
-        # Select sample                                                         
-        ID = self.list_IDs[index]                                               
-        X = self.data.data[10]                                                  
-        y = self.data.target[10]                                                
-                                                                                
-        return X, y
+        x = self.data[index]                                                  
+        y = torch.zeros(10)
+        y[self.target[index]] = 1
+
+        return x, y
 

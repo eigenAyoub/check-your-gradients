@@ -8,6 +8,9 @@ from torch.utils.data import Dataset, DataLoader
 
 from MNISTDataset import MNISTDataset
 
+import torch
+
+
 class Tensor(object):
     """Docstring for Tensor. """
 
@@ -22,7 +25,6 @@ class Tensor(object):
 
         # Gradients >> Now everyone can get it...
         self.grad = np.zeros(data.shape)
-        
 
     def __repr__(self):
         return str(self.data.__repr__())
@@ -30,12 +32,12 @@ class Tensor(object):
     def __str__(self):
         return str(self.data.__str__())
 
-    # Operations:
 
-    # Magic functions:
+    # Operations / Magic functions:
 
     def __sub__(self, other):
-        output = Tensor(self.data - other.data, label=self.label+"-"+other.label)
+        output = Tensor(self.data - other.data,
+                        label=self.label+"-"+other.label)
         output.roots = [self, other]
         output.how = "-"
         
@@ -57,27 +59,41 @@ class Tensor(object):
 
         return  output 
 
+    def softmax_layer(self):
+        mx = torch.argmax(self.data, dim = 1)[:,None]
+        sm = torch.sum(self.data, dim = 1)[:,None] 
+        output = torch.exp(self.data - mx)/sm
+        output = Tensor(output.numpy())
 
-    def entropy(self, other):
-        ypred = self.data
-        yhat = other.data
-
-        output = -np.log(yhat(
-
-        output = Tensor(np.sum(self.data**2), label="l")
-        output.grad = np.ones(self.data.shape)
-        output.roots = [self]
-        output.how = "Sum"
-        
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
             """
-            self.grad += 2*self.data
+            self.grad += self.output * (output.grad - 
+                                        torch.sum(G * output.data, 
+                                                  dim=1)[:, None]
+                                        )
 
         output.pass_the_grad = pass_the_gradient
 
         return  output 
+
+    def cross_entropy_loss(self, other):
+        """Assumes a softmax layer as input"""
+        output = -np.sum(other.data.numpy() * np.log(self.data)
+                            , axis=1 )
+        output = Tensor(output)
+
+        def pass_the_gradient():
+            """this function does:
+            > Updates the gradients of the parents/roots.
+            """
+            self.grad += - self.other / self.data
+
+        output.pass_the_grad = pass_the_gradient
+
+        return  output 
+
 
     def quadratic_loss(self):
         output = Tensor(np.sum(self.data**2), label="l")
@@ -96,7 +112,8 @@ class Tensor(object):
         return  output 
 
     def __add__(self, other):
-        output = Tensor(self.data + other.data, label=self.label+"+"+other.label)
+        output = Tensor(self.data + other.data, 
+                        label=self.label+"+"+other.label)
         output.roots = [self, other]
         output.how = "+"
         
@@ -119,7 +136,9 @@ class Tensor(object):
         return  output 
 
     def __mul__(self, other):
-        output = Tensor(self.data * other.data, label=self.label+"*"+other.label)
+
+        output = Tensor(self.data * other.data, 
+                        label=self.label+"*"+other.label)
         output.roots = [self, other] 
         output.how = "*"
         
@@ -160,7 +179,9 @@ class Tensor(object):
             self.grad += output.data*(1-output.data) * output.grad
         output.pass_the_grad = pass_the_gradient
 
-        return output 
+        return output
+
+
 
     def comp_graph(self):
         gr = []

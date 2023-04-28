@@ -2,14 +2,13 @@ import matplotlib.pyplot as plt
 from sklearn import datasets
 
 import numpy as np
-
 from numpy.random import normal, randint
-
 
 from Tensor import Tensor
 from MNISTDataset import MNISTDataset
 
-
+import torch
+from torch.utils.data import DataLoader
 
 # weights:
 w1_ = normal(scale = 1/3 ,size=(64, 120))                                       
@@ -29,13 +28,11 @@ batch_size = 20
 
 # Loading using DataSet and DataLoader:
 digits = datasets.load_digits()
-g = MNISTDataset(digits, N)
+g = MNISTDataset(digits.data, digits.target, N)
 data_loader = DataLoader(g, batch_size=16, shuffle=True)
 
-
-for i in range(0) :                                                             
-    x_, y_ =  next(iter(data_loader))                                           
-    x_, y_ = Tensor(x_), Tensor(y_)                                             
+x_, y_ =  next(iter(data_loader))                                           
+x, y = Tensor(x_), Tensor(y_)                                             
                                                                                 
 alpha = 0.01                                                                    
 
@@ -45,17 +42,24 @@ def forward(d):
 
 
 
-def pass_(x, y):
-    Z1 = x@W1; Z1.label = "Z1"
-    Z12 = Z1 + b1; Z12.label = "Z12"
-    L1 = Z12.sigmoid()
-    Z2 = L1@W2; Z2.label="Z2"
-    Z22 = Z2 + b2; Z22.label = "Z22" 
-    L2 = Z22.sigmoid()
-    print(L2.data.size(), y.data.size())
-    L3 = L2-y
-    loss = L3.quadratic_loss()
-    
+#def pass_(x, y):
+Z1 = x@W1; Z1.label = "Z1"
+Z12 = Z1 + b1; Z12.label = "Z12"
+L1 = Z12.sigmoid()
+Z2 = L1@W2; Z2.label = "Z2"
+Z22 = Z2 + b2; Z22.label = "Z22" 
+L2 = Z22.sigmoid()
+#print(L2.data.size(), y.data.size())
+Lsoft = L2.softmax_layer()
+
+
+
+
+for i in range(0):
+    # forward pass:
+
+
+    # backward pass:
     loss.pass_the_grad()
     L3.pass_the_grad()
     L2.pass_the_grad()
@@ -87,6 +91,3 @@ def pass_(x, y):
     b1.grad =  np.zeros(b1.grad.shape)
     W2.grad =  np.zeros(W2.grad.shape)
     b2.grad =  np.zeros(b2.grad.shape)
-
-
-                          

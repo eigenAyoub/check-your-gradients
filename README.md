@@ -1,4 +1,6 @@
-I'm starting an Autodiff project. Expect to see a lot of Gradients, Hessians, JAX and PyTorch. I'll be regularly updating. The progress of the project is intentially left as the last section of this page. See you!
+I'm trying to build an Autodiff library. I'll be regularly updating, and adding more features. This project is purely for fun. [(Fun is needed)](https://www.youtube.com/watch?v=AviMsVPO1Os&t=12s).
+
+The progress of the project is intentially left as the last section of this page. See you!
 
 ## ToC:
 1. [Abstract.](#abstract)
@@ -14,13 +16,13 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 * Be able to build and train NNs from scratch.
 * Focus on Modularity, and Optimization of code.
 * Check PyTorch/Jax & constantly use them to verify the correctness my code.
-* Appreciate more the design choices of PyTorch/Jax, and don't take them for granted.
+* Appreciate the design choices of PyTorch/Jax, and don't take them for granted.
 
 ### References:
 * Mathieu Blondel: Add github repo +  section from version of Murray (ML a probb perspective?)
 * Bishop NN Chapter has a section on backprop
 * Hennig (Lecture 8, Learning Representations)
-* The idea is to start this project inspired by MICROGRAD (Andrej Karpathy)and TinyGrad (George Hotz) streams.
+* Add references to: MICROGRAD (Andrej Karpathy)and TinyGrad (George Hotz) streams.
 
 ### Progress:
 
