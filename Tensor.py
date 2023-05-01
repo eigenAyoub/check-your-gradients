@@ -61,8 +61,8 @@ class Tensor(object):
 
     def softmax_layer(self):
         mx = torch.argmax(self.data, dim = 1)[:,None]
-        sm = torch.sum(self.data, dim = 1)[:,None] 
-        output = torch.exp(self.data - mx)/sm
+        tt = self.data - mx
+        output = tt / torch.sum(tt, dim=1)
         output = Tensor(output.numpy())
 
         output.how = "softmax layer"
@@ -173,6 +173,22 @@ class Tensor(object):
         output.pass_the_grad = pass_the_gradient
         
         return  output 
+
+    def ReLU(self):
+        output = self.data
+        output = Tensor( output * (output > 0 ), label="ReLU("+self.label+")")
+        output.roots = [self] 
+
+        output.how = "sig"
+        def pass_the_gradient():
+            """this function does:
+            > Updates the gradients of the parents/roots.
+            """
+
+            self.grad += self.output > 0
+        output.pass_the_grad = pass_the_gradient
+
+        return output
 
     def sigmoid(self):
         output = Tensor(1/(1+np.exp(-self.data)), label="σ("+self.label+")")

@@ -26,6 +26,15 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 
 ### Progress:
 
+1. Today: 05 May:
+    * **[DONE]** Make a working prototype in PyTorch for MNIST.
+    * **[DONE]** Debug why code wasn't working
+    * **[DONE]** Make nn.Linear() keep the same weights
+    * **[DONE]** Figure how parameters are init. in nn.Linear
+    * **[DONE]** Figure how to transport the same initial init. in params to your Manuel backprop.
+    * **[DONE]** Add ReLu, and ReLu.grad
+    * Make your library work.
+
 1. **[DONE]** Build a wrapper around **np.array**.
     * Add the necessary "magic" methods to make a simple MLP work.
     * Make sure the forward pass is working fine.
@@ -35,23 +44,23 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
     * Pay attention to "topological" sorts, when updating.
     * Don't forget to zero_grad after each update
     * Don't forget to add grads, when one componenet is the "root" of multiple ops.
-5. **[TO-DO]** Switch notation from X@W to W@X (feels more intuitive, could visual)
-6. **[TO_DO]** Add more magic methods to the wrapper.
-4. **[IN-PROGRESS]** Testing:
+4. **[DONE]** Switch notation from X@W to W@X (feels more intuitive, could visual)
+    * Decided to keep the same notation (Inputs: batch-size X num-features)
+5. **[TO_DO]** Add more magic methods to the wrapper.
+6. **[IN-PROGRESS]** Testing:
         * Automate testing.
         * Find a way to check the correctness, either:
             * **[DONE]** compare Vs. PyTorch.
-            * (OR/AND) Manauly check Gradients.    
-5. **[TO-DO]** Keep updating the plan, choices:, 
+7. **[TO-DO]** Keep updating the plan, choices:, 
    * l1/l2 Regularization? Dropout? Batch Norm? fancy Optimizers?
    * Complex Architectures? (e.g., )
 
-6. **[TO-DO]** Optimize:
+8. **[TO-DO]** Optimize:
     * Learn how to load mini-batches faster, perhaps using Iterators? Is it even useful?.
     * Improve your printing ("Cool people call it debugging skills")
     * Vertorize the 3-dim tensors manipulations (the softmax layer)
 
-7. **[DONE]** Priliminaries:   
+9. **[DONE]** Priliminaries:   
     1. Build a starting NN (no modularity whatsoever, just a script with a bunch of matrices):
          * Set up a working env:
          * Load MNIST, some pre-processing (baisc spliting and so one)
@@ -61,7 +70,7 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
         * Current accuracy around 94%.
             * Config: simple MLP, RELU, SIGMOID and quadrqatic loss.
 
-8. Extra notes to keep in mind:
+10. Extra notes to keep in mind:
     * Check why the Cross-Entropy layer is performing (weirdly) worse.
     * See how you can replicate your settings with PyTorch/Jax.
 
