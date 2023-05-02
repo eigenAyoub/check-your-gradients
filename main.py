@@ -22,16 +22,14 @@ np.random.seed(17)
 inp = 8
 
 np.random.seed(17)
+
 torch.manual_seed(17)
 net = NN(inp*inp, 100, 10)
-
-
-
                                                                                 
-W1 =Tensor(net.lin1.weight.data.numpy())
+W1 =Tensor(net.lin1.weight.data.numpy().T)
 b1 =Tensor(net.lin1.bias.data.numpy()) 
 
-W2 =Tensor(net.lin2.weight.data.numpy())
+W2 =Tensor(net.lin2.weight.data.numpy().T)
 b2 =Tensor(net.lin2.bias.data.numpy())
 
 
@@ -46,11 +44,14 @@ data_loader = DataLoader(g_train, batch_size =  32, shuffle=True)
 g_test = MNISTDataset(digits.data[1600:], digits.target[1600:], 1765-N)
 test_loader = DataLoader(g_test, batch_size =  32, shuffle=True)
 
-for epoch in range(1):
-    x_, y_ =  next(iter(data_loader))
-    for i in range(1):
-        x, y = Tensor(x_), Tensor(y_) 
+alpha = 0.001
 
+for epoch in range(20):
+    it =  iter(data_loader)
+    for i in range(50):
+
+        x_, y_ = next(it)
+        x, y = Tensor(x_), Tensor(y_) 
         # backward pass:
         Z1 = x@W1; Z1.label = "Z1"
         Z12 = Z1 + b1; Z12.label = "Z12"
@@ -58,14 +59,18 @@ for epoch in range(1):
 
         Z2 = L1@W2; Z2.label = "Z2"
         Z22 = Z2 + b2; Z22.label = "Z22" 
+        
 
-        Lsoft = L2.softmax_layer(); Lsoft.label = "softm(L2)"
-        l = Lsoft.cross_entropy_loss(y); l.label = "loss"
+        softmx = Z22.softmax_layer(); softmx.label = "softm(L2)"
+        logsoft = softmx.log();  logsoft.label = "log of softmx"
 
-        print("Loss at iteration ", i, "is: ", np.sum(l.data))
+        l = logsoft.NLLLoss(y); l.label = "loss"
+
+        print("Loss at iteration ", i, "is: ", np.mean(l.data))
 
         l.pass_the_grad()
-        Lsoft.pass_the_grad()
+        logsoft.pass_the_grad()
+        softmx.pass_the_grad()
 
         Z22.pass_the_grad()
         Z2.pass_the_grad()
@@ -85,9 +90,9 @@ for epoch in range(1):
         # Empty Grads:
 
         l.grad = np.ones(l.grad.shape)
-        Lsoft.grad = np.zeros(Lsoft.grad.shape)
+        logsoft = np.zeros(logsoft.grad.shape)
+        softmx = np.zeros(softmx.grad.shape)
 
-        L2.grad =  np.zeros(L2.grad.shape)
         Z22.grad = np.zeros(Z22.grad.shape)
         Z2.grad =  np.zeros(Z2.grad.shape)
 
@@ -100,5 +105,3 @@ for epoch in range(1):
 
         W2.grad =  np.zeros(W2.grad.shape)
         b2.grad =  np.zeros(b2.grad.shape)
-
-

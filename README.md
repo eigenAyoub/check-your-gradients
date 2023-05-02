@@ -26,14 +26,26 @@ My main goal is to learn Pytorch/Jax, but also have a clear vision on what's hap
 
 ### Progress:
 
-1. Today: 05 May:
+1. Next steps:
+    * More modularity.
+    * Add residual nets.
+    * Clean your code.
+    * Clean some wasted transformation from .numpy() .from_numpy()
+    * Add ADAM.
+
+
+
+1. 05-06 May:
     * **[DONE]** Make a working prototype in PyTorch for MNIST.
     * **[DONE]** Debug why code wasn't working
     * **[DONE]** Make nn.Linear() keep the same weights
     * **[DONE]** Figure how parameters are init. in nn.Linear
     * **[DONE]** Figure how to transport the same initial init. in params to your Manuel backprop.
     * **[DONE]** Add ReLu, and ReLu.grad
-    * Make your library work.
+    * **[DONE]** Decompose the CrossEntropyLoss to Softmax + Log + NLLLoss (for better debugging)
+    * **[DONE]** Replicate the same in the manual case
+    * **[DONE]** Debug and Make your library work.
+    * **[DONE]** Are your gradients matching PyTorch? [Y/n]: Yes, finally. working like a charm.
 
 1. **[DONE]** Build a wrapper around **np.array**.
     * Add the necessary "magic" methods to make a simple MLP work.

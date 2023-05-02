@@ -61,8 +61,8 @@ class Tensor(object):
 
     def softmax_layer(self):
         mx = torch.argmax(self.data, dim = 1)[:,None]
-        tt = self.data - mx
-        output = tt / torch.sum(tt, dim=1)
+        tt = torch.exp(self.data - mx)
+        output = tt / torch.sum(tt, dim=1)[:,None]
         output = Tensor(output.numpy())
 
         output.how = "softmax layer"
@@ -73,7 +73,6 @@ class Tensor(object):
             > Updates the gradients of the parents/roots.
             """
 
-
             self.grad += output.data * (output.grad - 
                                         np.sum(output.grad * output.data, 
                                                   axis=1)[:, None]
@@ -83,14 +82,57 @@ class Tensor(object):
 
         return  output 
 
-    def cross_entropy_loss(self, other):
+    def log(self):
         """Assumes a softmax layer as input"""
+        output = Tensor(np.log(self.data))
+        output.roots = [self]
+        output.how = "Log"
+
+        def pass_the_gradient():
+            """this function does:
+            > Updates the gradients of the parents/roots.
+            """
+            self.grad += output.grad / self.data 
+
+        output.pass_the_grad = pass_the_gradient
+
+        return  output 
+
+    def NLLLoss(self, other):
+        """Assumes a log softmax layer as input"""
+        output = -np.sum(other.data.numpy()*self.data, axis=1 )
+        output = Tensor(output)
+
+        output.roots = [self, other]
+        output.grad = np.ones(output.data.shape)
+        output.how = "NLLLoss"
+
+        def pass_the_gradient():
+            """this function does:
+            > Updates the gradients of the parents/roots.
+            """
+            self.grad += - other.data.numpy() / 32
+
+        output.pass_the_grad = pass_the_gradient
+
+        return  output 
+
+    def cross_entropy_loss(self, other):
+
+        """Assumes a softmax layer as input"""
+
+        # this fucntion has aa problem, please fix it, and don't embarass 
+        # yourself.
         output = -np.sum(other.data.numpy() * np.log(self.data)
                             , axis=1 )
         output = Tensor(output)
 
         output.roots = [self, other]
+
+        output.grad = np.ones(output.data.shape)
+
         output.how = "cross ent loss"
+
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
@@ -178,14 +220,14 @@ class Tensor(object):
         output = self.data
         output = Tensor( output * (output > 0 ), label="ReLU("+self.label+")")
         output.roots = [self] 
+        output.how = "ReLU"
 
-        output.how = "sig"
         def pass_the_gradient():
             """this function does:
             > Updates the gradients of the parents/roots.
             """
 
-            self.grad += self.output > 0
+            self.grad += (self.data.numpy() > 0) * output.grad
         output.pass_the_grad = pass_the_gradient
 
         return output
